@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
+# This script redirects yarn calls to pnpm for compatibility
 APP_ROOT = File.expand_path('..', __dir__)
 Dir.chdir(APP_ROOT) do
-  exec 'yarnpkg', *ARGV
+  # Use pnpm instead of yarn
+  exec 'pnpm', *ARGV
 rescue Errno::ENOENT
-  warn 'Yarn executable was not detected in the system.'
-  warn 'Download Yarn at https://yarnpkg.com/en/docs/install'
+  warn 'pnpm executable was not detected in the system.'
+  warn 'Install pnpm: npm install -g pnpm'
   exit 1
 end
