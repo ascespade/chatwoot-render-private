@@ -31,6 +31,12 @@ class ConfigLoader
     reconcile_feature_config
   end
 
+  # Public method: Used by GlobalConfig for typecasting
+  def general_configs
+    @config_path ||= Rails.root.join('config')
+    @general_configs ||= YAML.safe_load(File.read("#{@config_path}/installation_config.yml")).freeze
+  end
+
   private
 
   # Ensure database connection is active with retry logic
@@ -51,11 +57,6 @@ class ConfigLoader
         raise "Failed to establish database connection after #{max_retries} attempts: #{e.message}"
       end
     end
-  end
-
-  def general_configs
-    @config_path ||= Rails.root.join('config')
-    @general_configs ||= YAML.safe_load(File.read("#{@config_path}/installation_config.yml")).freeze
   end
 
   def account_features
