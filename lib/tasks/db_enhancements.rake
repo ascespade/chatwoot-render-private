@@ -1,8 +1,22 @@
+require 'timeout'
+
 # We are hooking config loader to run automatically everytime migration is executed
 Rake::Task['db:migrate'].enhance do
   if ActiveRecord::Base.connection.table_exists? 'installation_configs'
     puts 'Loading Installation config'
-    ConfigLoader.new.process
+    begin
+      # Add timeout to prevent hanging deployments
+      Timeout.timeout(60) do
+        ConfigLoader.new.process
+      end
+    rescue Timeout::Error => e
+      puts "WARNING: ConfigLoader timed out after 60 seconds: #{e.message}"
+      puts "Continuing deployment - configs can be loaded later"
+    rescue StandardError => e
+      puts "WARNING: ConfigLoader failed: #{e.class}: #{e.message}"
+      puts "Continuing deployment - configs can be loaded later"
+      Rails.logger.error("ConfigLoader error: #{e.message}") if defined?(Rails.logger)
+    end
   end
 end
 

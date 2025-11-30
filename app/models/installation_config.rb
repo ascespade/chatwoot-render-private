@@ -49,5 +49,8 @@ class InstallationConfig < ApplicationRecord
 
   def clear_cache
     GlobalConfig.clear_cache
+  rescue StandardError => e
+    # Don't fail the deployment if cache clearing fails
+    Rails.logger.warn("Failed to clear cache after InstallationConfig update: #{e.class}: #{e.message}") if defined?(Rails.logger)
   end
 end

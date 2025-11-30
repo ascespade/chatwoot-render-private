@@ -21,10 +21,15 @@ class GlobalConfig
     end
 
     def clear_cache
+      return unless defined?($alfred) && $alfred
+
       cached_keys = $alfred.with { |conn| conn.keys("#{VERSION}:#{KEY_PREFIX}:*") }
       (cached_keys || []).each do |cached_key|
         $alfred.with { |conn| conn.expire(cached_key, 0) }
       end
+    rescue StandardError => e
+      # Don't fail if Redis is unavailable - cache will be stale but app can continue
+      Rails.logger.warn("Failed to clear GlobalConfig cache: #{e.class}: #{e.message}") if defined?(Rails.logger)
     end
 
     private
