@@ -6,6 +6,7 @@
 
 # Ignore bundler config.
 /.bundle
+vendor/bundle
 
 # Ignore the default SQLite database.
 /db/*.sqlite3
@@ -16,6 +17,8 @@
 /tmp/*
 !/log/.keep
 !/tmp/.keep
+/storage/*
+!/storage/.keep
 *.mmdb
 
 # Ignore Byebug command history file.
@@ -29,6 +32,8 @@ master.key
 
 # Ignore env files
 .env
+.env.*
+!.env.example
 
 public/uploads
 public/packs*
@@ -50,7 +55,8 @@ public/assets/.sprockets-manifest-*.json
 .jest-cache
 
 # ignore jetbrains IDE files
-.idea
+.idea/
+.vscode/
 
 # coverage report
 buildreports
