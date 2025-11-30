@@ -2,21 +2,45 @@ require 'timeout'
 
 # We are hooking config loader to run automatically everytime migration is executed
 Rake::Task['db:migrate'].enhance do
-  if ActiveRecord::Base.connection.table_exists? 'installation_configs'
+  # Check if table exists with timeout protection
+  table_exists = begin
+    Timeout.timeout(5) do
+      ActiveRecord::Base.connection.table_exists?('installation_configs')
+    end
+  rescue StandardError => e
+    puts "WARNING: Could not check installation_configs table: #{e.message}"
+    false
+  end
+
+  if table_exists
     puts 'Loading Installation config'
+    start_time = Time.current
+    
     begin
-      # Add timeout to prevent hanging deployments
-      Timeout.timeout(60) do
+      # Reduced timeout to 30 seconds for faster failure
+      # Config loading should be fast, if it takes longer, something is wrong
+      Timeout.timeout(30) do
         ConfigLoader.new.process
+        elapsed = (Time.current - start_time).round(2)
+        puts "Installation config loaded successfully in #{elapsed}s"
       end
     rescue Timeout::Error => e
-      puts "WARNING: ConfigLoader timed out after 60 seconds: #{e.message}"
+      elapsed = (Time.current - start_time).round(2)
+      puts "WARNING: ConfigLoader timed out after #{elapsed} seconds: #{e.message}"
+      puts "Continuing deployment - configs can be loaded later via rake task"
+      Rails.logger.warn("ConfigLoader timeout after #{elapsed}s: #{e.message}") if defined?(Rails.logger)
+    rescue ActiveRecord::StatementInvalid => e
+      puts "WARNING: ConfigLoader database error: #{e.message}"
       puts "Continuing deployment - configs can be loaded later"
+      Rails.logger.error("ConfigLoader database error: #{e.class}: #{e.message}") if defined?(Rails.logger)
     rescue StandardError => e
-      puts "WARNING: ConfigLoader failed: #{e.class}: #{e.message}"
-      puts "Continuing deployment - configs can be loaded later"
-      Rails.logger.error("ConfigLoader error: #{e.message}") if defined?(Rails.logger)
+      elapsed = (Time.current - start_time).round(2)
+      puts "WARNING: ConfigLoader failed after #{elapsed}s: #{e.class}: #{e.message}"
+      puts "Continuing deployment - configs can be loaded later via: bundle exec rake db:load_config"
+      Rails.logger.error("ConfigLoader error: #{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}") if defined?(Rails.logger)
     end
+  else
+    puts "Skipping Installation config loading (table not found or database unavailable)"
   end
 end
 
@@ -40,6 +64,37 @@ db_namespace = namespace :db do
       db_namespace['migrate'].invoke
     rescue ActiveRecord::NoDatabaseError
       db_namespace['setup'].invoke
+    end
+  end
+end
+
+# Manual task to load installation configs (useful if auto-loading fails during deployment)
+namespace :db do
+  desc 'Load installation configuration (can be run manually if deployment hangs)'
+  task load_config: :environment do
+    puts 'Loading Installation config manually...'
+    start_time = Time.current
+    
+    begin
+      Timeout.timeout(30) do
+        ConfigLoader.new.process
+        elapsed = (Time.current - start_time).round(2)
+        puts "✓ Installation config loaded successfully in #{elapsed}s"
+      end
+    rescue Timeout::Error => e
+      elapsed = (Time.current - start_time).round(2)
+      puts "✗ ERROR: ConfigLoader timed out after #{elapsed} seconds"
+      puts "This usually indicates a database connection issue."
+      puts "Please check:"
+      puts "  - Database is accessible"
+      puts "  - Database connection string is correct"
+      puts "  - Network connectivity to database"
+      exit 1
+    rescue StandardError => e
+      elapsed = (Time.current - start_time).round(2)
+      puts "✗ ERROR: ConfigLoader failed after #{elapsed}s: #{e.class}: #{e.message}"
+      puts e.backtrace.first(5).join("\n")
+      exit 1
     end
   end
 end
