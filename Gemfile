@@ -67,6 +67,8 @@ gem 'puma'
 gem 'vite_rails'
 # metrics on heroku
 gem 'barnes'
+# Required for Ruby 3.4.0+ compatibility (mutex_m removed from stdlib)
+gem 'mutex_m'
 
 ##--- gems for authentication & authorization ---##
 gem 'devise', '>= 4.9.4'
