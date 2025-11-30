@@ -1,0 +1,63 @@
+/**
+ * Enterprise Theme Overrides
+ * 
+ * Additional theme customizations that extend the base enterprise theme.
+ * This file is imported after enterprise-theme.scss to allow further customization.
+ * 
+ * Use this file to:
+ * - Override specific component styles
+ * - Add custom CSS variables
+ * - Implement brand-specific styling
+ */
+
+// ============================================================================
+// CUSTOM CSS VARIABLE OVERRIDES
+// ============================================================================
+
+:root {
+  // Override theme variables here if needed
+  // Example:
+  // --color-primary: #YOUR_BRAND_COLOR;
+  // --radius-md: 16px;
+}
+
+// ============================================================================
+// BRAND-SPECIFIC OVERRIDES
+// ============================================================================
+
+// Example: Custom logo sizing
+.enterprise-logo {
+  max-width: 120px;
+  max-height: 40px;
+}
+
+// Example: Custom header styling
+.enterprise-header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+}
+
+// ============================================================================
+// WHITE-LABEL SPECIFIC STYLING
+// ============================================================================
+
+// Hide branding footer completely if configured
+.enterprise-hide-footer {
+  display: none !important;
+}
+
+// Hide help docs link in sidebar
+.enterprise-hide-help-docs {
+  display: none !important;
+}
+
+// ============================================================================
+// COMPONENT-SPECIFIC OVERRIDES
+// ============================================================================
+
+// Add your custom component overrides here
+// Example:
+// .custom-button {
+//   background: var(--color-primary);
+//   border-radius: var(--radius-md);
+// }
+

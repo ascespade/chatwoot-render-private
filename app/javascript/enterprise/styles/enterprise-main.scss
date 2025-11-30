@@ -1,0 +1,13 @@
+/**
+ * Enterprise Main Stylesheet
+ * 
+ * This file imports all enterprise styles in the correct order.
+ * Import this file in your main SCSS entry point.
+ */
+
+// Import base enterprise theme first
+@import '../../styles/enterprise-theme';
+
+// Import theme overrides for customization
+@import './theme-overrides';
+

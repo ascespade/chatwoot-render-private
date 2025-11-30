@@ -34,8 +34,8 @@
 @import 'plugins/multiselect';
 @import 'plugins/dropdown';
 
-// Enterprise Modern Purple Theme (must be imported last to override all styles)
-@import '../../../styles/enterprise-theme';
+// Enterprise Theme System (must be imported last to override all styles)
+@import '../../../enterprise/styles/enterprise-main';
 
 .tooltip {
   @apply bg-slate-900 text-white py-1 px-2 z-40 text-xs rounded-md dark:bg-slate-200 dark:text-slate-900 max-w-96;

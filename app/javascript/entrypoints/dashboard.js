@@ -36,6 +36,10 @@ import { directive as onClickaway } from 'vue3-click-away';
 
 import 'floating-vue/dist/style.css';
 
+// Initialize Enterprise Features (must be before app initialization)
+import { initEnterprise } from '../enterprise/index.js';
+initEnterprise();
+
 const i18n = createI18n({
   legacy: false, // https://github.com/intlify/vue-i18n/issues/1902
   locale: 'en',
