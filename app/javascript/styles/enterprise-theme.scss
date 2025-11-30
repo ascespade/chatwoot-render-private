@@ -1,0 +1,691 @@
+/**
+ * Enterprise Modern Purple Theme for Chatwoot 3.x
+ * 
+ * This theme provides a complete modern UI redesign using safe,
+ * non-breaking SCSS + CSS variable overrides.
+ * 
+ * Theme Style: Modern Purple (Linear.app style)
+ * 
+ * Usage:
+ * Import this file after the main _woot.scss in your build configuration:
+ * @import 'styles/enterprise-theme';
+ */
+
+// ============================================================================
+// CSS VARIABLES - Modern Purple Theme
+// ============================================================================
+
+:root {
+  // Primary Purple Color Palette
+  --color-primary: #6D5DFB;
+  --color-primary-dark: #5546E8;
+  --color-primary-light: #E4E1FF;
+  --color-primary-hover: #7A6AFF;
+  --color-primary-active: #4839D8;
+  
+  // Accent Colors
+  --color-accent: #A48CFF;
+  --color-accent-light: #C9B8FF;
+  
+  // Semantic Colors
+  --color-success: #4ADE80;
+  --color-success-light: #86EFAC;
+  --color-success-dark: #22C55E;
+  
+  --color-warning: #FBBF24;
+  --color-warning-light: #FCD34D;
+  --color-warning-dark: #F59E0B;
+  
+  --color-danger: #F87171;
+  --color-danger-light: #FCA5A5;
+  --color-danger-dark: #EF4444;
+  
+  // Background Colors
+  --color-bg: #F8F8FC;
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F3F4F6;
+  
+  // Border Radius
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  // Shadows - Modern & Smooth
+  --shadow-sm: 0 1px 2px 0 rgba(109, 93, 251, 0.05);
+  --shadow-md: 0 4px 20px rgba(109, 93, 251, 0.08);
+  --shadow-lg: 0 10px 40px rgba(109, 93, 251, 0.12);
+  --shadow-xl: 0 20px 60px rgba(109, 93, 251, 0.15);
+  
+  // Glass Effect
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(109, 93, 251, 0.1);
+  --glass-blur: blur(20px);
+  
+  // Transitions
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  // Typography
+  --font-smooth: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+}
+
+// Dark Mode Variables
+body.dark {
+  --color-bg: #0F0F1E;
+  --color-surface: #1A1A2E;
+  --color-surface-hover: #252539;
+  --glass-bg: rgba(26, 26, 46, 0.85);
+  --glass-border: rgba(109, 93, 251, 0.2);
+}
+
+// ============================================================================
+// OVERRIDE Woot Primary Colors
+// ============================================================================
+
+:root {
+  // Override Chatwoot's primary color system
+  --w-500: var(--color-primary);
+  --w-600: var(--color-primary-dark);
+  --w-400: var(--color-primary-light);
+  --w-50: var(--color-primary-light);
+  --color-woot: var(--color-primary);
+}
+
+// ============================================================================
+// BUTTONS - Modern Purple Theme
+// ============================================================================
+
+.button {
+  // Base button styling
+  border-radius: var(--radius-md) !important;
+  font-weight: 500 !important;
+  transition: all var(--transition-base) !important;
+  box-shadow: var(--shadow-sm) !important;
+  position: relative;
+  overflow: hidden;
+  
+  // Primary button
+  &.primary,
+  &:not(.secondary):not(.clear):not(.alert):not(.warning):not(.success):not(.hollow):not(.smooth) {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%) !important;
+    border-color: var(--color-primary) !important;
+    color: white !important;
+    
+    &:hover {
+      background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary-dark) 100%) !important;
+      box-shadow: var(--shadow-md) !important;
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm) !important;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    &:hover::before {
+      left: 100%;
+    }
+  }
+  
+  // Secondary button
+  &.secondary {
+    background: var(--color-surface) !important;
+    border: 1px solid var(--color-primary-light) !important;
+    color: var(--color-primary) !important;
+    
+    &:hover {
+      background: var(--color-primary-light) !important;
+      border-color: var(--color-primary) !important;
+      box-shadow: var(--shadow-sm) !important;
+      transform: translateY(-1px);
+    }
+  }
+  
+  // Clear button
+  &.clear {
+    background: transparent !important;
+    color: var(--color-primary) !important;
+    
+    &:hover {
+      background: var(--color-primary-light) !important;
+      color: var(--color-primary-dark) !important;
+    }
+  }
+  
+  // Success button
+  &.success {
+    background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%) !important;
+    border-color: var(--color-success) !important;
+    
+    &:hover {
+      box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3) !important;
+      transform: translateY(-1px);
+    }
+  }
+  
+  // Warning button
+  &.warning {
+    background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-dark) 100%) !important;
+    border-color: var(--color-warning) !important;
+    
+    &:hover {
+      box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3) !important;
+      transform: translateY(-1px);
+    }
+  }
+  
+  // Alert/Danger button
+  &.alert {
+    background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-dark) 100%) !important;
+    border-color: var(--color-danger) !important;
+    
+    &:hover {
+      box-shadow: 0 4px 20px rgba(248, 113, 113, 0.3) !important;
+      transform: translateY(-1px);
+    }
+  }
+  
+  // Hollow button
+  &.hollow {
+    background: transparent !important;
+    border: 2px solid var(--color-primary) !important;
+    color: var(--color-primary) !important;
+    
+    &:hover {
+      background: var(--color-primary) !important;
+      color: white !important;
+      transform: translateY(-1px);
+    }
+  }
+  
+  // Smooth button
+  &.smooth {
+    background: var(--color-primary-light) !important;
+    color: var(--color-primary-dark) !important;
+    
+    &:hover {
+      background: var(--color-primary) !important;
+      color: white !important;
+    }
+  }
+  
+  // Disabled state
+  &:disabled,
+  &.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+  }
+  
+  // Rounded variant
+  &.round {
+    border-radius: var(--radius-full) !important;
+  }
+}
+
+// ============================================================================
+// CARDS - Modern Shadows & Rounded Corners
+// ============================================================================
+
+.card,
+.conversation,
+[class*="card"] {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-md) !important;
+  transition: all var(--transition-base) !important;
+  background: var(--color-surface) !important;
+  border: 1px solid rgba(109, 93, 251, 0.08) !important;
+  
+  &:hover {
+    box-shadow: var(--shadow-lg) !important;
+    transform: translateY(-2px);
+    border-color: rgba(109, 93, 251, 0.15) !important;
+  }
+}
+
+// Conversation cards
+.conversation {
+  border-radius: var(--radius-md) !important;
+  
+  &.active {
+    background: var(--color-primary-light) !important;
+    border-left-color: var(--color-primary) !important;
+  }
+}
+
+// ============================================================================
+// SIDEBAR - Glass-like Background with Gradient
+// ============================================================================
+
+// Primary Sidebar
+aside[class*="sidebar"],
+[class*="Sidebar"],
+aside > div:first-child {
+  background: linear-gradient(
+    180deg,
+    var(--glass-bg) 0%,
+    rgba(228, 225, 255, 0.95) 100%
+  ) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-right: 1px solid var(--glass-border) !important;
+  
+  // Navigation items
+  a,
+  [role="button"] {
+    border-radius: var(--radius-md) !important;
+    transition: all var(--transition-base) !important;
+    
+    &:hover {
+      background: var(--color-primary-light) !important;
+      transform: translateX(4px);
+    }
+    
+    // Active state
+    &.router-link-active,
+    &[aria-current="page"],
+    &[class*="active"] {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%) !important;
+      color: white !important;
+      box-shadow: var(--shadow-sm) !important;
+      
+      svg,
+      i {
+        color: white !important;
+      }
+    }
+  }
+  
+  // Icons
+  svg,
+  i {
+    transition: all var(--transition-base) !important;
+  }
+  
+  a:hover svg,
+  a:hover i {
+    color: var(--color-primary) !important;
+    transform: scale(1.1);
+  }
+}
+
+// Dark mode sidebar
+body.dark aside[class*="sidebar"],
+body.dark [class*="Sidebar"] {
+  background: linear-gradient(
+    180deg,
+    var(--glass-bg) 0%,
+    rgba(26, 26, 46, 0.95) 100%
+  ) !important;
+}
+
+// ============================================================================
+// HEADER - Glass Effect
+// ============================================================================
+
+header,
+[class*="Header"],
+[class*="header"] {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+  
+  // Sticky header enhancement
+  &.sticky,
+  &[class*="sticky"] {
+    box-shadow: var(--shadow-md) !important;
+  }
+}
+
+// ============================================================================
+// FORM FIELDS - Rounded & Modern Focus States
+// ============================================================================
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="url"],
+input[type="search"],
+textarea,
+select,
+.form-input {
+  border-radius: var(--radius-md) !important;
+  border: 1px solid rgba(109, 93, 251, 0.2) !important;
+  transition: all var(--transition-base) !important;
+  background: var(--color-surface) !important;
+  padding: 10px 14px !important;
+  
+  &:focus {
+    outline: none !important;
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 3px rgba(109, 93, 251, 0.1) !important;
+    transform: translateY(-1px);
+  }
+  
+  &:hover:not(:disabled) {
+    border-color: rgba(109, 93, 251, 0.4) !important;
+  }
+  
+  &::placeholder {
+    color: rgba(109, 93, 251, 0.4) !important;
+  }
+  
+  &[disabled] {
+    background: var(--color-surface-hover) !important;
+    opacity: 0.6;
+  }
+}
+
+// Select dropdowns
+select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='32' height='24' viewBox='0 0 32 24'><polygon points='0,0 32,0 16,24' style='fill: rgb%28109, 93, 251%29'></polygon></svg>") !important;
+  
+  &:focus {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='32' height='24' viewBox='0 0 32 24'><polygon points='0,0 32,0 16,24' style='fill: rgb%2869, 70, 232%29'></polygon></svg>") !important;
+  }
+}
+
+// ============================================================================
+// MODALS - Modern Shadows & Rounded Corners
+// ============================================================================
+
+.modal-mask,
+[class*="modal"],
+[class*="Modal"] {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  background: rgba(15, 15, 30, 0.6) !important;
+}
+
+.modal-container,
+[class*="modal-container"],
+[class*="ModalContainer"],
+dialog > div {
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-xl) !important;
+  border: 1px solid var(--glass-border) !important;
+  background: var(--color-surface) !important;
+  animation: modalSlideIn var(--transition-slow) ease-out !important;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ============================================================================
+// TABLES - Modern Styling
+// ============================================================================
+
+table,
+.table,
+[class*="table"] {
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-sm) !important;
+  
+  thead {
+    background: linear-gradient(135deg, var(--color-primary-light) 0%, rgba(228, 225, 255, 0.5) 100%) !important;
+    
+    th {
+      border-bottom: 2px solid var(--color-primary) !important;
+      color: var(--color-primary-dark) !important;
+      font-weight: 600 !important;
+      padding: 16px !important;
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: all var(--transition-fast) !important;
+      
+      &:hover {
+        background: var(--color-primary-light) !important;
+        transform: scale(1.01);
+      }
+      
+      &:nth-child(even) {
+        background: rgba(109, 93, 251, 0.02) !important;
+      }
+    }
+    
+    td {
+      padding: 14px 16px !important;
+      border-bottom: 1px solid rgba(109, 93, 251, 0.1) !important;
+    }
+  }
+}
+
+// ============================================================================
+// TAGS - Rounded & Colorful
+// ============================================================================
+
+.tag,
+.label,
+[class*="tag"],
+[class*="Tag"],
+[class*="badge"],
+[class*="Badge"] {
+  border-radius: var(--radius-full) !important;
+  padding: 4px 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  transition: all var(--transition-fast) !important;
+  box-shadow: var(--shadow-sm) !important;
+  
+  // Default tag (primary)
+  &:not([class*="success"]):not([class*="warning"]):not([class*="danger"]):not([class*="info"]) {
+    background: linear-gradient(135deg, var(--color-primary-light) 0%, rgba(228, 225, 255, 0.8) 100%) !important;
+    color: var(--color-primary-dark) !important;
+    border: 1px solid var(--color-primary) !important;
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md) !important;
+  }
+}
+
+// ============================================================================
+// DROPDOWN MENUS - Modern Styling
+// ============================================================================
+
+.dropdown-menu,
+[class*="dropdown"],
+[class*="Dropdown"],
+[class*="menu"],
+[role="menu"] {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: 1px solid var(--glass-border) !important;
+  background: var(--color-surface) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  padding: 8px !important;
+  
+  a,
+  button,
+  [role="menuitem"] {
+    border-radius: var(--radius-md) !important;
+    padding: 10px 14px !important;
+    transition: all var(--transition-fast) !important;
+    
+    &:hover {
+      background: var(--color-primary-light) !important;
+      color: var(--color-primary-dark) !important;
+      transform: translateX(4px);
+    }
+    
+    &:active {
+      transform: translateX(2px) scale(0.98);
+    }
+  }
+}
+
+// ============================================================================
+// TABS - Modern Styling
+// ============================================================================
+
+[class*="tab"],
+[role="tab"] {
+  border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
+  transition: all var(--transition-base) !important;
+  
+  &[aria-selected="true"],
+  &.active {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%) !important;
+    color: white !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+  
+  &:hover:not([aria-selected="true"]):not(.active) {
+    background: var(--color-primary-light) !important;
+    color: var(--color-primary-dark) !important;
+  }
+}
+
+// ============================================================================
+// UTILITY CLASSES - Additional Modern Styling
+// ============================================================================
+
+// Glass effect utility
+.glass-effect {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+
+// Modern card utility
+.modern-card {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-md) !important;
+  background: var(--color-surface) !important;
+  border: 1px solid rgba(109, 93, 251, 0.08) !important;
+  transition: all var(--transition-base) !important;
+  
+  &:hover {
+    box-shadow: var(--shadow-lg) !important;
+    transform: translateY(-2px);
+  }
+}
+
+// Gradient text utility
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// ============================================================================
+// ANIMATIONS - Smooth Transitions
+// ============================================================================
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// Apply fade-in to new elements
+.fade-in {
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+// ============================================================================
+// RESPONSIVE ENHANCEMENTS
+// ============================================================================
+
+@media (max-width: 768px) {
+  .button {
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+  }
+  
+  .modal-container {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+// ============================================================================
+// DARK MODE SPECIFIC OVERRIDES
+// ============================================================================
+
+body.dark {
+  .button.primary {
+    box-shadow: 0 4px 20px rgba(109, 93, 251, 0.3) !important;
+  }
+  
+  .card,
+  .conversation {
+    background: var(--color-surface) !important;
+    border-color: rgba(109, 93, 251, 0.2) !important;
+  }
+  
+  input,
+  textarea,
+  select {
+    background: var(--color-surface) !important;
+    border-color: rgba(109, 93, 251, 0.3) !important;
+    color: white !important;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(109, 93, 251, 0.2) !important;
+    }
+  }
+}
+
