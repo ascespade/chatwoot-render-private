@@ -14,7 +14,7 @@ class DoctorDashboard < Administrate::BaseDashboard
     email: Field::String.with_options(searchable: true),
     phone: Field::String,
     google_calendar_id: Field::String,
-    working_hours: Field::JSON,
+    working_hours: Field::Text,
     bio: Field::Text,
     active: Field::Boolean,
     appointments: CountField,

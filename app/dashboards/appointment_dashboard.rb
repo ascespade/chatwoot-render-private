@@ -22,7 +22,7 @@ class AppointmentDashboard < Administrate::BaseDashboard
     google_calendar_event_id: Field::String,
     reminder_sent_at_24h: Field::String,
     reminder_sent_at_2h: Field::String,
-    metadata: Field::JSON,
+    metadata: Field::Text,
     appointment_reminders: Field::HasMany,
     created_at: Field::DateTime,
     updated_at: Field::DateTime
