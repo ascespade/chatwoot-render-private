@@ -53,6 +53,36 @@ end
 db_namespace = namespace :db do
   desc 'Runs setup if database does not exist, or runs migrations if it does'
   task chatwoot_prepare: :load_config do
+    # Check database connectivity BEFORE attempting any operations
+    # This prevents failures during Docker build phase when database doesn't exist yet
+    db_config = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).first
+    return unless db_config # No database config, skip
+    
+    # Try a quick connectivity check with timeout
+    database_available = begin
+      Timeout.timeout(5) do
+        ActiveRecord::Base.establish_connection(db_config.configuration_hash)
+        ActiveRecord::Base.connection.execute('SELECT 1')
+        true
+      end
+    rescue ActiveRecord::NoDatabaseError, PG::ConnectionBad, PG::UndefinedDatabase, StandardError => e
+      error_message = e.message.to_s.downcase
+      # Check if it's a database connection error (normal during build)
+      if error_message.include?('database') || error_message.include?('connection') || 
+         error_message.include?('could not find') || error_message.include?('could not translate') ||
+         error_message.include?('name or service not known')
+        puts "⚠ Skipped database preparation (database unavailable - normal during build)"
+        puts "Database will be prepared automatically on application startup when database is available."
+        return false
+      else
+        # Unexpected error - return false and let outer handler catch it
+        return false
+      end
+    end
+    
+    return unless database_available
+    
+    # Database is available, proceed with normal preparation
     begin
       ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).each do |db_config|
         ActiveRecord::Base.establish_connection(db_config.configuration_hash)
@@ -64,23 +94,30 @@ db_namespace = namespace :db do
 
         db_namespace['migrate'].invoke
       rescue ActiveRecord::NoDatabaseError => e
+        # Database was available but doesn't exist - try to setup
         begin
           db_namespace['setup'].invoke
         rescue StandardError => setup_error
-          # If setup fails due to database unavailability, skip gracefully
-          raise setup_error
+          # If setup also fails, skip gracefully
+          error_msg = setup_error.message.to_s.downcase
+          if error_msg.include?('database') || error_msg.include?('connection') || 
+             error_msg.include?('could not find') || error_msg.include?('could not translate') ||
+             error_msg.include?('name or service not known')
+            puts "⚠ Could not setup database: #{setup_error.message}"
+            puts "Database setup will be retried on application startup."
+          else
+            raise
+          end
         end
       end
     rescue ActiveRecord::NoDatabaseError, PG::ConnectionBad, PG::UndefinedDatabase, StandardError => e
-      # Database unavailable during build (normal during Docker build phase)
-      # Skip gracefully - migrations will run on application startup when DB is available
+      # Final catch-all for any unexpected errors
       error_message = e.message.to_s.downcase
       if error_message.include?('database') || error_message.include?('connection') || 
          error_message.include?('could not find') || error_message.include?('could not translate') ||
          error_message.include?('could not create') || error_message.include?('name or service not known')
         puts "⚠ Skipped database preparation (database unavailable - normal during build)"
         puts "Database will be prepared automatically on application startup when database is available."
-        # Don't fail the build - this is expected during Docker build phase
       else
         # Re-raise unexpected errors
         raise
