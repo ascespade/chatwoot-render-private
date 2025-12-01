@@ -22,13 +22,19 @@ class ConfigLoader
     @config_path ||= Rails.root.join('config')
 
     # Verify database connection before proceeding
-    ensure_database_connection
+    # If database is unavailable (e.g., during build), skip gracefully
+    unless ensure_database_connection
+      Rails.logger.debug("[ConfigLoader] Database unavailable, skipping config loading (normal during build)") if defined?(Rails.logger)
+      return false
+    end
 
     # general installation configs
     reconcile_general_config
 
     # default account based feature configs
     reconcile_feature_config
+    
+    true
   end
 
   # Public method: Used by GlobalConfig for typecasting
@@ -39,24 +45,19 @@ class ConfigLoader
 
   private
 
-  # Ensure database connection is active with retry logic
+  # Ensure database connection is active
+  # Gracefully skips if database is unavailable (e.g., during build phase)
   def ensure_database_connection
-    max_retries = 3
-    retry_count = 0
-    
-    begin
-      ActiveRecord::Base.connection_pool.with_connection do |conn|
-        conn.execute('SELECT 1')
-      end
-    rescue StandardError => e
-      retry_count += 1
-      if retry_count < max_retries
-        sleep(2 ** retry_count) # Exponential backoff
-        retry
-      else
-        raise "Failed to establish database connection after #{max_retries} attempts: #{e.message}"
-      end
+    # Try to connect - if it fails, skip gracefully (normal during build when DB doesn't exist)
+    ActiveRecord::Base.connection_pool.with_connection do |conn|
+      conn.execute('SELECT 1')
     end
+    return true
+  rescue StandardError => e
+    # Any error means database is unavailable - skip gracefully
+    # This is normal during Docker build phase when database doesn't exist yet
+    Rails.logger.debug("[ConfigLoader] Database unavailable (#{e.class}): #{e.message}. Skipping config load (normal during build).") if defined?(Rails.logger)
+    return false
   end
 
   def account_features

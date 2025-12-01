@@ -77,9 +77,13 @@ namespace :db do
     
     begin
       Timeout.timeout(30) do
-        ConfigLoader.new.process
+        result = ConfigLoader.new.process
         elapsed = (Time.current - start_time).round(2)
-        puts "✓ Installation config loaded successfully in #{elapsed}s"
+        if result
+          puts "✓ Installation config loaded successfully in #{elapsed}s"
+        else
+          puts "⚠ Skipped Installation config loading (database unavailable - normal during build)"
+        end
       end
     rescue Timeout::Error => e
       elapsed = (Time.current - start_time).round(2)
