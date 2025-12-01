@@ -1,0 +1,69 @@
+# Railway Configuration for Chatwoot Clinic Edition
+# 
+# This file configures Railway deployment with auto-superadmin creation
+# and all clinic features enabled.
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "bundle exec rails server -p $PORT -b 0.0.0.0"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Environment Variables - Set these in Railway Dashboard → Variables
+# Or uncomment and set values here (not recommended for secrets)
+[env]
+# ============================================
+# SUPERADMIN CONFIGURATION (Method 3 - Simplified)
+# ============================================
+# Required: Email of the user who should be SuperAdmin
+# The user must already exist in the system
+SUPER_ADMIN_EMAIL = "cur@cw.com.sa"
+
+# Enable auto-designation (set to 'true' to enable)
+AUTO_CREATE_SUPERADMIN = "true"
+
+# Optional: Only allow one SuperAdmin (remove SuperAdmin from others)
+# SUPER_ADMIN_SINGLE = "false"
+
+# ============================================
+# ENTERPRISE MODE
+# ============================================
+INSTALLATION_PRICING_PLAN = "enterprise"
+INSTALLATION_PRICING_PLAN_QUANTITY = "999999"
+
+# ============================================
+# CLINIC CONFIGURATION
+# ============================================
+CLINIC_NAME = "YourClinic"
+CLINIC_AI_ENABLED = "true"
+
+# ============================================
+# AI ASSISTANT (Optional)
+# ============================================
+# OPENAI_API_KEY = "your-openai-api-key"
+# OPENAI_GPT_MODEL = "gpt-4o-mini"
+
+# ============================================
+# GOOGLE CALENDAR (Optional)
+# ============================================
+# GOOGLE_CALENDAR_CLIENT_ID = "your-client-id"
+# GOOGLE_CALENDAR_CLIENT_SECRET = "your-client-secret"
+# GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON = '{"type":"service_account",...}'
+
+# ============================================
+# SECURITY SETTINGS
+# ============================================
+# Disable public signup for security
+# ENABLE_ACCOUNT_SIGNUP = "false"
+
+# ============================================
+# BRANDING (Optional)
+# ============================================
+# PRODUCT_NAME = "Your Clinic Name"
+# BRAND_NAME = "Your Brand"
+
+# Note: Set sensitive values (passwords, API keys) in Railway Dashboard → Variables
+# This file is just a template - actual secrets should be set via Railway UI
+
