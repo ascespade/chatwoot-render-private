@@ -19,6 +19,21 @@ Rails.application.config.after_initialize do
   next unless ENV['SUPER_ADMIN_EMAIL'].present?
   
   begin
+    # Check if database is available before proceeding
+    # During build/deployment, database may not exist yet
+    unless ActiveRecord::Base.connection_pool.with_connection { |conn| conn.active? }
+      Rails.logger.debug "[Auto-SuperAdmin] Database not available yet, skipping (this is normal during build)"
+      next
+    end
+    
+    # Try a simple query to verify database connection works
+    ActiveRecord::Base.connection_pool.with_connection do |conn|
+      conn.execute('SELECT 1')
+    rescue ActiveRecord::StatementInvalid, PG::ConnectionBad, PG::UndefinedDatabase
+      Rails.logger.debug "[Auto-SuperAdmin] Database connection failed, skipping (this is normal during build)"
+      next
+    end
+    
     email = ENV['SUPER_ADMIN_EMAIL'].strip.downcase
     
     # Check if user exists with this email
@@ -55,6 +70,10 @@ Rails.application.config.after_initialize do
       end
     end
     
+  rescue ActiveRecord::StatementInvalid, PG::ConnectionBad, PG::UndefinedDatabase => e
+    # Database not available - this is fine during build phase
+    Rails.logger.debug "[Auto-SuperAdmin] Database not available: #{e.message}. Skipping (normal during build)."
+    # Don't fail startup if database isn't ready
   rescue StandardError => e
     Rails.logger.error "[Auto-SuperAdmin] Error: #{e.message}"
     Rails.logger.error e.backtrace.first(5).join("\n")
