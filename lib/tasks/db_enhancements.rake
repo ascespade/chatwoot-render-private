@@ -90,6 +90,19 @@ db_namespace = namespace :db do
       unless database_available
         next
       end
+    rescue StandardError => e
+      # If connectivity check fails, skip gracefully
+      error_message = e.message.to_s.downcase
+      if error_message.include?('database') || error_message.include?('connection') || 
+         error_message.include?('could not find') || error_message.include?('could not translate') ||
+         error_message.include?('name or service not known')
+        puts "⚠ Skipped database preparation (database unavailable - normal during build)"
+        puts "Database will be prepared automatically on application startup when database is available."
+        next
+      else
+        raise
+      end
+    end
     
     # Database is available, proceed with normal preparation
     begin
