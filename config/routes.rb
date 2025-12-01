@@ -265,6 +265,23 @@ Rails.application.routes.draw do
           end
 
           resources :upload, only: [:create]
+
+          # Clinic features
+          namespace :clinic do
+            resources :doctors, only: [:index, :show, :create, :update, :destroy]
+            resources :appointments, only: [:index, :show, :create, :update, :destroy] do
+              collection do
+                get :today
+                get :upcoming
+              end
+              member do
+                post :confirm
+                post :complete
+                post :cancel
+              end
+            end
+            resource :dashboard, only: [:show]
+          end
         end
       end
       # end of account scoped api routes

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Appointment Reminder</h1>
+    
+    <p>Hi <%= @contact.name %>,</p>
+    
+    <p>This is a reminder that you have an appointment with <strong>Dr. <%= @doctor.name %></strong> in <%= @reminder_type == '24h_before' ? '24' : '2' %> hours.</p>
+    
+    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+      <p><strong>📅 Date & Time:</strong> <%= @appointment.scheduled_at.strftime('%B %d, %Y at %I:%M %p') %></p>
+      <p><strong>👨‍⚕️ Doctor:</strong> <%= @doctor.display_name %></p>
+      <% if @appointment.notes.present? %>
+        <p><strong>Notes:</strong> <%= @appointment.notes %></p>
+      <% end %>
+    </div>
+    
+    <p>Please arrive 10 minutes early for your appointment.</p>
+    
+    <p>If you need to cancel or reschedule, please reply to this email or contact us directly.</p>
+    
+    <p>Thank you!</p>
+  </body>
+</html>
+
