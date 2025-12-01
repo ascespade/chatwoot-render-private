@@ -1,0 +1,37 @@
+{
+  "name": "AutoFixMode",
+  "description": "Cursor automatically analyzes logs and fixes errors.",
+  "rules": {
+    "log_files": [
+      "dev_logs/web.log",
+      "dev_logs/worker.log"
+    ],
+    "error_signatures": [
+      "Error",
+      "Exception",
+      "undefined method",
+      "NoMethodError",
+      "ActiveRecord::",
+      "RuntimeError",
+      "crashed",
+      "ECONNREFUSED"
+    ],
+    "auto_fix_flow": [
+      "1. Watch logs for new errors.",
+      "2. When error appears: extract file, line, stack trace.",
+      "3. Generate patch.",
+      "4. Ask user: 'apply patch?'",
+      "5. After patch, request commit.",
+      "6. Wait for deploy.",
+      "7. Recheck logs.",
+      "8. Repeat until error disappears."
+    ],
+    "messages": {
+      "found_error": "🔍 تم اكتشاف خطأ جديد… جاري التحليل",
+      "patch_ready": "⚙️ جاهز أصلح المشكلة. هل تريد تطبيق الـ Patch؟",
+      "waiting_logs": "⏳ في انتظار لوق جديد…",
+      "resolved": "✅ تم حل المشكلة بالكامل."
+    }
+  }
+}
+

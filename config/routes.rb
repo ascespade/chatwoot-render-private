@@ -516,6 +516,16 @@ Rails.application.routes.draw do
       resources :platform_apps, only: [:index, :new, :create, :show, :edit, :update]
       resource :instance_status, only: [:show]
 
+      # Clinic features management
+      resources :doctors, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+      resources :appointments, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+        member do
+          post :confirm
+          post :complete
+          post :cancel
+        end
+      end
+
       resource :settings, only: [:show] do
         get :refresh, on: :collection
       end

@@ -1,0 +1,44 @@
+{
+  "tools": [
+    {
+      "name": "railwayGetServices",
+      "description": "Get list of Railway services",
+      "command": "bash tools/railway/get_services.sh",
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "railwayGetLogs",
+      "description": "Fetch Railway logs",
+      "command": "bash tools/railway/get_logs.sh",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "service_id": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "number"
+          }
+        },
+        "required": ["service_id"]
+      }
+    },
+    {
+      "name": "railwayGetEnvs",
+      "description": "Fetch environment variables",
+      "command": "bash tools/railway/get_envs.sh",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "service_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}
+
