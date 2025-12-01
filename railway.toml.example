@@ -1,0 +1,33 @@
+# Railway Configuration for Enterprise Mode
+# 
+# Copy this file to railway.toml or set these values in Railway dashboard
+# under Project → Variables
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "bundle exec rails server"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Environment Variables for Enterprise Mode
+[env]
+# Enable Enterprise Mode
+INSTALLATION_PRICING_PLAN = "enterprise"
+
+# Set unlimited agent quantity
+INSTALLATION_PRICING_PLAN_QUANTITY = "999999"
+
+# Optional: Disable enterprise directory check
+# Set to "true" only if you want to disable enterprise features
+# DISABLE_ENTERPRISE = "false"
+
+# Optional: Custom branding (if using enterprise branding system)
+# PRODUCT_NAME = "Your Product Name"
+# BRAND_NAME = "Your Brand"
+# HIDE_FOOTER = "true"
+
+# Note: These values can also be set via Railway dashboard:
+# Project → Variables → Add Variable
+
