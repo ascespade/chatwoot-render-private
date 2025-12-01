@@ -20,17 +20,21 @@ Rails.application.config.after_initialize do
   
   begin
     # Check if database is available before proceeding
-    # During build/deployment, database may not exist yet
-    unless ActiveRecord::Base.connection_pool.with_connection { |conn| conn.active? }
-      Rails.logger.debug "[Auto-SuperAdmin] Database not available yet, skipping (this is normal during build)"
+    # During build/deployment, database may not exist yet - skip silently
+    begin
+      ActiveRecord::Base.connection_pool.with_connection do |conn|
+        # Try a simple query to verify database connection works
+        conn.execute('SELECT 1')
+      end
+    rescue ActiveRecord::NoDatabaseError, ActiveRecord::StatementInvalid, 
+           PG::ConnectionBad, PG::UndefinedDatabase, PG::Error,
+           ActiveRecord::ConnectionNotEstablished => db_error
+      # Database not available - this is normal during build phase, skip silently
+      Rails.logger.debug "[Auto-SuperAdmin] Database not available during initialization (normal during build): #{db_error.class}"
       next
-    end
-    
-    # Try a simple query to verify database connection works
-    ActiveRecord::Base.connection_pool.with_connection do |conn|
-      conn.execute('SELECT 1')
-    rescue ActiveRecord::StatementInvalid, PG::ConnectionBad, PG::UndefinedDatabase
-      Rails.logger.debug "[Auto-SuperAdmin] Database connection failed, skipping (this is normal during build)"
+    rescue StandardError => db_error
+      # Other database errors - log but don't fail
+      Rails.logger.debug "[Auto-SuperAdmin] Database check failed (skipping): #{db_error.class}"
       next
     end
     
