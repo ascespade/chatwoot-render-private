@@ -53,34 +53,43 @@ end
 db_namespace = namespace :db do
   desc 'Runs setup if database does not exist, or runs migrations if it does'
   task chatwoot_prepare: :load_config do
-    # Check database connectivity BEFORE attempting any operations
-    # This prevents failures during Docker build phase when database doesn't exist yet
-    db_config = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).first
-    return unless db_config # No database config, skip
-    
-    # Try a quick connectivity check with timeout
-    database_available = begin
-      Timeout.timeout(5) do
-        ActiveRecord::Base.establish_connection(db_config.configuration_hash)
-        ActiveRecord::Base.connection.execute('SELECT 1')
-        true
+    begin
+      # Check database connectivity BEFORE attempting any operations
+      # This prevents failures during Docker build phase when database doesn't exist yet
+      db_config = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).first
+      
+      # Skip if no database config
+      unless db_config
+        puts "⚠ No database configuration found, skipping database preparation"
+        next
       end
-    rescue ActiveRecord::NoDatabaseError, PG::ConnectionBad, PG::UndefinedDatabase, StandardError => e
-      error_message = e.message.to_s.downcase
-      # Check if it's a database connection error (normal during build)
-      if error_message.include?('database') || error_message.include?('connection') || 
-         error_message.include?('could not find') || error_message.include?('could not translate') ||
-         error_message.include?('name or service not known')
-        puts "⚠ Skipped database preparation (database unavailable - normal during build)"
-        puts "Database will be prepared automatically on application startup when database is available."
-        return false
-      else
-        # Unexpected error - return false and let outer handler catch it
-        return false
+      
+      # Try a quick connectivity check with timeout
+      database_available = begin
+        Timeout.timeout(5) do
+          ActiveRecord::Base.establish_connection(db_config.configuration_hash)
+          ActiveRecord::Base.connection.execute('SELECT 1')
+          true
+        end
+      rescue ActiveRecord::NoDatabaseError, PG::ConnectionBad, PG::UndefinedDatabase, StandardError => e
+        error_message = e.message.to_s.downcase
+        # Check if it's a database connection error (normal during build)
+        if error_message.include?('database') || error_message.include?('connection') || 
+           error_message.include?('could not find') || error_message.include?('could not translate') ||
+           error_message.include?('name or service not known')
+          puts "⚠ Skipped database preparation (database unavailable - normal during build)"
+          puts "Database will be prepared automatically on application startup when database is available."
+          false
+        else
+          # Unexpected error - return false and let outer handler catch it
+          false
+        end
       end
-    end
-    
-    return unless database_available
+      
+      # Skip if database is not available
+      unless database_available
+        next
+      end
     
     # Database is available, proceed with normal preparation
     begin
