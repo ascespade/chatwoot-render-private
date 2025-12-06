@@ -24,6 +24,7 @@ RUN apk update && apk add --no-cache \
   postgresql-dev \
   postgresql-client \
   nodejs=20.15.1-r0 \
+  npm \
   git \
   xz \
   vips \
@@ -82,9 +83,13 @@ ENV BUNDLE_PATH="/gems"
 # Copy node_modules from previous stage
 COPY --from=node_modules /app/node_modules ./node_modules
 
-# Ensure pnpm is in PATH
+# Ensure Node.js and pnpm are in PATH
+# Node.js and npm are installed in base stage
 ENV PNPM_HOME="/root/.local/share/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
+ENV PATH="/usr/bin:$PNPM_HOME:$PATH"
+
+# Verify Node.js is available (required for ExecJS)
+RUN node --version && npm --version
 
 # Copy application code (this invalidates cache when code changes)
 COPY . /app
@@ -94,6 +99,8 @@ ENV RAILS_ENV=production
 ENV RAILS_SERVE_STATIC_FILES=true
 ENV BUNDLE_WITHOUT="development:test"
 ENV NODE_OPTIONS="--max-old-space-size=6144"
+# Ensure ExecJS can find Node.js
+ENV EXECJS_RUNTIME=Node
 
 # Create necessary directories
 RUN mkdir -p /app/log /app/tmp/cache
