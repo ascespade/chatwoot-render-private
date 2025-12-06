@@ -104,8 +104,9 @@ RUN SECRET_KEY_BASE=precompile_placeholder \
     bundle exec rake assets:precompile
 
 # Clean up unnecessary files
-RUN rm -rf /gems/ruby/3.3.3/cache/*.gem \
-    && find /gems/ruby/3.3.3/gems/ \( -name "*.c" -o -name "*.o" \) -delete \
+# Use flexible paths since gem structure may vary
+RUN (find /gems -name "*.gem" -type f -delete || true) \
+    && (find /gems \( -name "*.c" -o -name "*.o" \) -delete || true) \
     && rm -rf spec tmp/cache .git .gitignore node_modules
 
 # Stage 5: Production image (minimal)
