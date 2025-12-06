@@ -99,3 +99,6 @@ yarn-debug.log*
 
 # Railway automation log files
 dev_logs/*.log
+# Ignore Nixpacks generated files
+.nixpacks/
+
