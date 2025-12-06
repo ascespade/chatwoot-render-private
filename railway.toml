@@ -4,7 +4,8 @@
 # and all clinic features enabled.
 
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
+dockerfilePath = "docker/Dockerfile.railway"
 
 [deploy]
 startCommand = "bundle exec rails server -p $PORT -b 0.0.0.0"

@@ -1,0 +1,139 @@
+# Optimized Dockerfile for Railway
+# Build time: ~4-6 minutes (vs 12+ minutes with NIXPACKS)
+# Uses pre-built Ruby image + multi-stage caching
+
+# Stage 1: Base dependencies (rarely changes - best caching)
+FROM ruby:3.3.3-alpine3.19 AS base
+
+ENV BUNDLER_VERSION=2.1.2
+ENV PNPM_HOME="/root/.local/share/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ENV NODE_OPTIONS="--max-old-space-size=6144"
+ENV RAILS_ENV=production
+ENV RAILS_SERVE_STATIC_FILES=true
+ENV BUNDLE_PATH="/gems"
+ENV BUNDLE_WITHOUT="development:test"
+
+# Install system dependencies once (cached layer)
+RUN apk update && apk add --no-cache \
+  openssl \
+  tar \
+  build-base \
+  tzdata \
+  postgresql-dev \
+  postgresql-client \
+  nodejs=20.15.1-r0 \
+  git \
+  xz \
+  vips \
+  imagemagick \
+  && gem install bundler:${BUNDLER_VERSION} \
+  && wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.shrc" SHELL="$(which sh)" sh - \
+  && echo 'export PNPM_HOME="/root/.local/share/pnpm"' >> /root/.shrc \
+  && echo 'export PATH="$PNPM_HOME:$PATH"' >> /root/.shrc \
+  && source /root/.shrc && pnpm add -g pnpm@9
+
+# Stage 2: Ruby gems (cached unless Gemfile changes)
+FROM base AS gems
+
+WORKDIR /app
+
+# Copy dependency files first for better caching
+COPY Gemfile Gemfile.lock ./
+
+# Install build dependencies for native gems
+RUN apk add --no-cache \
+  musl \
+  ruby-full \
+  ruby-dev \
+  gcc \
+  make \
+  musl-dev \
+  openssl-dev \
+  g++ \
+  linux-headers
+
+RUN bundle config set --local path '/gems' && \
+    bundle config set --local without 'development test' && \
+    bundle install -j 4 -r 3
+
+# Stage 3: Node dependencies (cached unless package.json changes)
+FROM base AS node_modules
+
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+
+RUN export PNPM_HOME="/root/.local/share/pnpm" && \
+    export PATH="$PNPM_HOME:$PATH" && \
+    source /root/.shrc && \
+    pnpm install --frozen-lockfile
+
+# Stage 4: Application code and asset compilation
+FROM base AS builder
+
+WORKDIR /app
+
+# Copy gems from previous stage
+COPY --from=gems /gems /gems
+ENV BUNDLE_PATH="/gems"
+
+# Copy node_modules from previous stage
+COPY --from=node_modules /app/node_modules ./node_modules
+
+# Ensure pnpm is in PATH
+ENV PNPM_HOME="/root/.local/share/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+# Copy application code (this invalidates cache when code changes)
+COPY . /app
+
+# Configure environment
+ENV RAILS_ENV=production
+ENV RAILS_SERVE_STATIC_FILES=true
+ENV BUNDLE_WITHOUT="development:test"
+ENV NODE_OPTIONS="--max-old-space-size=6144"
+
+# Create necessary directories
+RUN mkdir -p /app/log /app/tmp/cache
+
+# Precompile assets (includes Vite builds)
+RUN SECRET_KEY_BASE=precompile_placeholder \
+    RAILS_LOG_TO_STDOUT=enabled \
+    bundle exec rake assets:precompile
+
+# Clean up unnecessary files
+RUN rm -rf /gems/ruby/3.3.3/cache/*.gem \
+    && find /gems/ruby/3.3.3/gems/ \( -name "*.c" -o -name "*.o" \) -delete \
+    && rm -rf spec tmp/cache .git .gitignore node_modules
+
+# Stage 5: Production image (minimal)
+FROM ruby:3.3.3-alpine3.19 AS production
+
+ENV BUNDLER_VERSION=2.1.2
+ENV RAILS_ENV=production
+ENV RAILS_SERVE_STATIC_FILES=true
+ENV BUNDLE_PATH="/gems"
+ENV BUNDLE_WITHOUT="development:test"
+
+# Install only runtime dependencies (no build tools)
+RUN apk update && apk add --no-cache \
+  openssl \
+  tzdata \
+  postgresql-client \
+  imagemagick \
+  vips \
+  git \
+  && gem install bundler:${BUNDLER_VERSION}
+
+# Copy gems from builder
+COPY --from=builder /gems /gems
+
+# Copy application from builder
+COPY --from=builder /app /app
+
+WORKDIR /app
+
+EXPOSE 3000
+
+CMD ["bundle", "exec", "rails", "server", "-p", "3000", "-b", "0.0.0.0"]
+
