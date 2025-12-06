@@ -15,6 +15,7 @@ ENV BUNDLE_PATH="/gems"
 ENV BUNDLE_WITHOUT="development:test"
 
 # Install system dependencies once (cached layer)
+# libc6-compat provides glibc compatibility for gems like grpc
 RUN apk update && apk add --no-cache \
   openssl \
   tar \
@@ -27,6 +28,7 @@ RUN apk update && apk add --no-cache \
   xz \
   vips \
   imagemagick \
+  libc6-compat \
   && gem install bundler:${BUNDLER_VERSION} \
   && wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.shrc" SHELL="$(which sh)" sh - \
   && echo 'export PNPM_HOME="/root/.local/share/pnpm"' >> /root/.shrc \
@@ -116,6 +118,7 @@ ENV BUNDLE_PATH="/gems"
 ENV BUNDLE_WITHOUT="development:test"
 
 # Install only runtime dependencies (no build tools)
+# libc6-compat needed for grpc and other glibc-compiled gems
 RUN apk update && apk add --no-cache \
   openssl \
   tzdata \
@@ -123,6 +126,7 @@ RUN apk update && apk add --no-cache \
   imagemagick \
   vips \
   git \
+  libc6-compat \
   && gem install bundler:${BUNDLER_VERSION}
 
 # Copy gems from builder
